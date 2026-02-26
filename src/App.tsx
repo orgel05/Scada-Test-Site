@@ -21,7 +21,7 @@ import {
   History
 } from 'lucide-react';
 import { cn } from './lib/utils';
-import { ControlMode, INITIAL_MACHINE_STATE, MachineState, MODE_DESCRIPTIONS } from './constants';
+import { ControlMode, INITIAL_MACHINE_STATE, MachineState, MODE_DESCRIPTIONS, DEFECT_SCENARIOS } from './constants';
 
 // --- Components ---
 
@@ -726,6 +726,55 @@ export default function App() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Defect Handling Section */}
+        <section className="mt-20">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-600">
+              <AlertTriangle size={20} />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold">불량 발생 시 대응 체계 비교</h3>
+              <p className="text-sm text-zinc-500">각 제어 단계별 불량 상황에 대한 대처 및 관리 방식의 차이</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {DEFECT_SCENARIOS.map((scenario, idx) => (
+              <div key={idx} className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+                <div className="bg-zinc-50 px-6 py-4 border-b border-zinc-200">
+                  <h4 className="font-bold text-zinc-900 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-red-500 rounded-full" />
+                    {scenario.title}
+                  </h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
+                  {(['manual', 'hmi', 'scada', 'mes'] as const).map((m) => (
+                    <div key={m} className={cn(
+                      "p-6 space-y-3 transition-colors",
+                      mode === m ? "bg-zinc-50/50" : ""
+                    )}>
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "text-[10px] font-bold px-2 py-0.5 rounded uppercase",
+                          m === 'manual' ? "bg-amber-100 text-amber-700" :
+                          m === 'hmi' ? "bg-blue-100 text-blue-700" :
+                          m === 'scada' ? "bg-emerald-100 text-emerald-700" :
+                          "bg-indigo-100 text-indigo-700"
+                        )}>
+                          {MODE_DESCRIPTIONS[m].title}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-600 leading-relaxed">
+                        {scenario[m]}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Scenario Guide */}
         <section className="mt-20">
