@@ -1,0 +1,5 @@
+{
+  "name": "MES Control Strategy Comparison",
+  "description": "A comparative visualization tool for MES implementation, demonstrating the differences between Manual Control, PLC/HMI Local Control, and SCADA-integrated Automatic Control.",
+  "requestFramePermissions": []
+}
