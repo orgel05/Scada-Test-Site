@@ -25,44 +25,127 @@ import { ControlMode, INITIAL_MACHINE_STATE, MachineState, MODE_DESCRIPTIONS } f
 
 // --- Components ---
 
-const RebarVisualizer = ({ state, onCut }: { state: MachineState, onCut?: () => void }) => {
+const RebarVisualizer = ({ state }: { state: MachineState }) => {
+  const [isCutting, setIsCutting] = useState(false);
+  const prevCount = useRef(state.count);
+
+  useEffect(() => {
+    if (state.count > prevCount.current) {
+      setIsCutting(true);
+      const timer = setTimeout(() => setIsCutting(false), 500);
+      prevCount.current = state.count;
+      return () => clearTimeout(timer);
+    }
+    prevCount.current = state.count;
+  }, [state.count]);
+
   return (
-    <div className="relative h-40 bg-zinc-950 rounded-xl border border-zinc-800 overflow-hidden flex items-center px-12">
+    <div className="relative h-48 bg-zinc-950 rounded-2xl border border-zinc-800 overflow-hidden flex items-center px-12 shadow-2xl">
+      {/* Background Grid */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(circle, #333 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+
       {/* Conveyor Belt */}
-      <div className="absolute inset-x-0 bottom-8 h-4 bg-zinc-900 border-y border-zinc-800 flex overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+      <div className="absolute inset-x-0 bottom-10 h-6 bg-zinc-900 border-y border-zinc-800 flex overflow-hidden shadow-inner">
+        {[...Array(30)].map((_, i) => (
           <motion.div 
             key={i}
-            className="w-8 h-full border-r border-zinc-800 shrink-0"
-            animate={state.isRunning ? { x: [0, 32] } : {}}
-            transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
+            className="w-10 h-full border-r border-zinc-800 shrink-0"
+            animate={state.isRunning ? { x: [0, 40] } : {}}
+            transition={{ repeat: Infinity, duration: 0.4, ease: "linear" }}
           />
         ))}
       </div>
 
-      {/* Rebar */}
+      {/* Rebar Shadow */}
       <motion.div 
-        className="h-3 bg-gradient-to-r from-zinc-600 to-zinc-400 rounded-full relative z-10 shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+        className="absolute bottom-16 h-2 bg-black/40 blur-md rounded-full z-0"
         style={{ width: `${(state.length / 12) * 100}%` }}
       />
 
-      {/* Cutter Head */}
-      <div className="absolute right-24 top-0 bottom-0 w-1 bg-zinc-800 z-20">
+      {/* Rebar (Enhanced Styling) */}
+      <motion.div 
+        className="h-6 relative z-10 rounded-sm shadow-lg overflow-hidden border-y border-white/10"
+        style={{ 
+          width: `${(state.length / 12) * 100}%`,
+          backgroundColor: '#92400e', // Amber-800 (Rusty Steel)
+          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 12px, rgba(0,0,0,0.4) 12px, rgba(0,0,0,0.4) 15px)',
+          boxShadow: 'inset 0 4px 6px rgba(255,255,255,0.2), inset 0 -4px 6px rgba(0,0,0,0.3), 0 10px 15px -3px rgba(0,0,0,0.5)'
+        }}
+      >
+        {/* Metallic Shine */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-black/20" />
+      </motion.div>
+
+      {/* Sparks / Cut Effect */}
+      <AnimatePresence>
+        {isCutting && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute top-1/2 -translate-y-1/2 z-30 pointer-events-none"
+            style={{ left: `${(state.targetLength / 12) * 100}%`, transform: 'translate(-50%, -50%)' }}
+          >
+            <div className="relative flex items-center justify-center">
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-1 h-6 bg-yellow-400 rounded-full"
+                  initial={{ rotate: i * 30, y: 0, scale: 1 }}
+                  animate={{ y: -60, x: (Math.random() - 0.5) * 40, opacity: 0, scale: 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                />
+              ))}
+              <motion.div 
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [0, 2, 0], opacity: [0, 1, 0] }}
+                className="w-12 h-12 bg-white rounded-full blur-xl"
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cutter Head (Dynamic Position) */}
+      <motion.div 
+        className="absolute top-0 bottom-0 w-1 bg-zinc-800/50 z-20"
+        animate={{ left: `${(state.targetLength / 12) * 100}%` }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      >
         <motion.div 
-          className="absolute top-1/2 -translate-y-1/2 -left-4 w-10 h-10 bg-zinc-800 border border-zinc-700 rounded flex items-center justify-center text-zinc-400"
-          animate={onCut ? { scale: [1, 0.9, 1] } : {}}
+          className="absolute top-1/2 -translate-y-1/2 -left-8 w-16 h-16 bg-zinc-800 border-2 border-zinc-600 rounded-xl flex items-center justify-center text-zinc-300 shadow-2xl"
+          animate={isCutting ? { 
+            y: ["-50%", "0%", "-50%"],
+            scale: [1, 1.1, 1],
+            backgroundColor: ["#27272a", "#3f3f46", "#27272a"]
+          } : {}}
+          transition={{ duration: 0.3, ease: "backOut" }}
         >
-          <Scissors size={20} />
+          <Scissors size={28} className={cn("transition-colors duration-200", isCutting ? "text-yellow-400" : "text-zinc-400")} />
+          
+          {/* Blade Visual */}
+          <motion.div 
+            className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-zinc-400 rounded-full"
+            animate={isCutting ? { opacity: [0, 1, 0], y: [0, 20, 0] } : { opacity: 0 }}
+          />
+          
+          {/* Position Label */}
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-zinc-800 rounded text-[8px] font-bold text-zinc-500 whitespace-nowrap border border-zinc-700">
+            절단점: {state.targetLength.toFixed(1)}m
+          </div>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Labels */}
       <div className="absolute top-4 left-6 flex gap-4">
-        <div className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[10px] font-mono text-zinc-500">
-          길이: {state.length.toFixed(2)}m
+        <div className="px-3 py-1 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400 flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+          길이: <span className="text-white font-bold">{state.length.toFixed(2)}m</span>
         </div>
-        <div className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded text-[10px] font-mono text-zinc-500">
-          온도: {state.temp.toFixed(1)}°C
+        <div className="px-3 py-1 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400 flex items-center gap-2">
+          <div className={cn("w-1.5 h-1.5 rounded-full", state.temp > 40 ? "bg-red-500 animate-pulse" : "bg-emerald-500")} />
+          온도: <span className="text-white font-bold">{state.temp.toFixed(1)}°C</span>
         </div>
       </div>
     </div>
