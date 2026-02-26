@@ -9,6 +9,8 @@ export interface MachineState {
   isAuto: boolean;
   targetLength: number;
   alarm: string | null;
+  isDefectSimulating: boolean;
+  defectType: 'length' | 'temp' | null;
 }
 
 export const INITIAL_MACHINE_STATE: MachineState = {
@@ -19,7 +21,9 @@ export const INITIAL_MACHINE_STATE: MachineState = {
   isRunning: false,
   isAuto: false,
   targetLength: 8.0,
-  alarm: null
+  alarm: null,
+  isDefectSimulating: false,
+  defectType: null
 };
 
 export const MODE_DESCRIPTIONS = {

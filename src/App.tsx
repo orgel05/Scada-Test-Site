@@ -144,10 +144,30 @@ const RebarVisualizer = ({ state }: { state: MachineState }) => {
           길이: <span className="text-white font-bold">{state.length.toFixed(2)}m</span>
         </div>
         <div className="px-3 py-1 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400 flex items-center gap-2">
-          <div className={cn("w-1.5 h-1.5 rounded-full", state.temp > 40 ? "bg-red-500 animate-pulse" : "bg-emerald-500")} />
+          <div className={cn("w-1.5 h-1.5 rounded-full", (state.temp > 40 || state.defectType === 'temp') ? "bg-red-500 animate-pulse" : "bg-emerald-500")} />
           온도: <span className="text-white font-bold">{state.temp.toFixed(1)}°C</span>
         </div>
       </div>
+
+      {/* Alarm Overlay */}
+      <AnimatePresence>
+        {state.alarm && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-40 flex items-center justify-center bg-red-950/20 backdrop-blur-[1px]"
+          >
+            <div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
+              <AlertTriangle size={24} />
+              <div className="text-left">
+                <p className="text-[10px] font-bold opacity-80 uppercase">시스템 알람</p>
+                <p className="text-sm font-black">{state.alarm}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -211,6 +231,13 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
         </div>
         <div className="text-[10px] font-mono text-zinc-500">V2.4.1 로컬</div>
       </div>
+
+      {state.alarm && (
+        <div className="bg-red-500/20 border border-red-500/50 p-3 rounded-lg flex items-center gap-3 mb-4">
+          <AlertTriangle size={16} className="text-red-500 animate-pulse" />
+          <span className="text-xs font-bold text-red-500">{state.alarm}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-zinc-900 p-3 rounded-lg border border-zinc-700">
@@ -314,6 +341,26 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
           </div>
         </div>
       </div>
+
+      {state.alarm && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+              <AlertTriangle size={18} />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-red-600">설비 이상 알람 발생</p>
+              <p className="text-[10px] text-red-500">{state.alarm}</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setState(prev => ({ ...prev, alarm: null, isDefectSimulating: false, temp: 25 }))}
+            className="px-3 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold"
+          >
+            알람 해제 (Reset)
+          </button>
+        </div>
+      )}
 
       {/* Real-time Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -578,30 +625,72 @@ export default function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       setState(prev => {
-        if (!prev.isRunning) return prev;
+        if (!prev.isRunning && !prev.isDefectSimulating) return prev;
 
-        let nextLength = prev.length + 0.05;
+        let nextLength = prev.length + (prev.isRunning ? 0.05 : 0);
         let nextCount = prev.count;
-        let nextTemp = prev.temp + 0.01;
+        let nextTemp = prev.temp + (prev.isRunning ? 0.01 : 0);
+        let nextAlarm = prev.alarm;
+        let nextIsRunning = prev.isRunning;
 
-        // Auto Cut Logic (HMI/SCADA/MES)
-        if (prev.isAuto && nextLength >= prev.targetLength) {
+        // Defect Simulation Logic
+        if (prev.isDefectSimulating) {
+          if (prev.defectType === 'temp') {
+            nextTemp += 0.5; // Rapid heating
+            if (nextTemp > 60) {
+              nextAlarm = "커터 과열 감지 (60°C 초과)";
+              if (mode !== 'manual') nextIsRunning = false; // Auto-stop for HMI/SCADA/MES
+            }
+          } else if (prev.defectType === 'length') {
+            // Length error: skip cut or cut at wrong time
+            if (nextLength >= prev.targetLength + 1.5) {
+              nextAlarm = "치수 정밀도 불량 (허용 오차 초과)";
+              if (mode !== 'manual') nextIsRunning = false;
+            }
+          }
+        }
+
+        // Auto Cut Logic (HMI/SCADA/MES) - Only if no alarm or in manual
+        const canCut = !nextAlarm || mode === 'manual';
+        if (canCut && prev.isAuto && nextLength >= prev.targetLength && !prev.isDefectSimulating) {
           nextLength = 0;
           nextCount += 1;
-          nextTemp += 0.5; // Cutting generates heat
+          nextTemp += 0.5;
         }
 
         return {
           ...prev,
           length: nextLength,
           count: nextCount,
-          temp: nextTemp
+          temp: nextTemp,
+          alarm: nextAlarm,
+          isRunning: nextIsRunning
         };
       });
     }, 50);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [mode]);
+
+  const triggerDefect = (type: 'length' | 'temp') => {
+    setState(prev => ({
+      ...prev,
+      isDefectSimulating: true,
+      defectType: type,
+      isRunning: true,
+      alarm: null
+    }));
+    
+    // Auto-resolve simulation after some time if needed, or keep it for demo
+  };
+
+  const resetSimulation = () => {
+    setState({
+      ...INITIAL_MACHINE_STATE,
+      isRunning: false,
+      isAuto: mode !== 'manual'
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-zinc-900 font-sans">
@@ -638,34 +727,56 @@ export default function App() {
           </div>
         </section>
 
-        {/* Mode Selector Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 p-1 bg-zinc-200/50 rounded-2xl w-fit">
-          {(['manual', 'hmi', 'scada', 'mes'] as ControlMode[]).map((m) => (
-            <button
-              key={m}
-              onClick={() => {
-                setMode(m);
-                // Reset some states when switching for clarity
-                if (m === 'mes') {
-                  setState(prev => ({ ...prev, isAuto: true, isRunning: true }));
-                } else {
-                  setState(prev => ({ ...prev, isAuto: m !== 'manual' }));
-                }
-              }}
-              className={cn(
-                "px-6 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
-                mode === m 
-                  ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-300" 
-                  : "text-zinc-500 hover:text-zinc-900"
-              )}
+        {/* Mode Selector Tabs & Simulation Controls */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div className="flex flex-wrap gap-2 p-1 bg-zinc-200/50 rounded-2xl w-fit">
+            {(['manual', 'hmi', 'scada', 'mes'] as ControlMode[]).map((m) => (
+              <button
+                key={m}
+                onClick={() => {
+                  setMode(m);
+                  if (m === 'mes') {
+                    setState(prev => ({ ...prev, isAuto: true, isRunning: true, alarm: null, isDefectSimulating: false }));
+                  } else {
+                    setState(prev => ({ ...prev, isAuto: m !== 'manual', alarm: null, isDefectSimulating: false }));
+                  }
+                }}
+                className={cn(
+                  "px-6 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+                  mode === m 
+                    ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-300" 
+                    : "text-zinc-500 hover:text-zinc-900"
+                )}
+              >
+                {m === 'manual' && <Settings2 size={16} />}
+                {m === 'hmi' && <Smartphone size={16} />}
+                {m === 'scada' && <Monitor size={16} />}
+                {m === 'mes' && <BarChart3 size={16} />}
+                {MODE_DESCRIPTIONS[m].title}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <button 
+              onClick={() => triggerDefect('length')}
+              className="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-[10px] font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
             >
-              {m === 'manual' && <Settings2 size={16} />}
-              {m === 'hmi' && <Smartphone size={16} />}
-              {m === 'scada' && <Monitor size={16} />}
-              {m === 'mes' && <BarChart3 size={16} />}
-              {MODE_DESCRIPTIONS[m].title}
+              <Scissors size={14} /> 치수 불량 시연
             </button>
-          ))}
+            <button 
+              onClick={() => triggerDefect('temp')}
+              className="px-4 py-2 bg-orange-50 text-orange-600 border border-orange-100 rounded-xl text-[10px] font-bold hover:bg-orange-100 transition-colors flex items-center gap-2"
+            >
+              <Activity size={14} /> 과열 불량 시연
+            </button>
+            <button 
+              onClick={resetSimulation}
+              className="px-4 py-2 bg-zinc-100 text-zinc-600 border border-zinc-200 rounded-xl text-[10px] font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2"
+            >
+              <RotateCcw size={14} /> 초기화
+            </button>
+          </div>
         </div>
 
         {/* Simulation Area */}
