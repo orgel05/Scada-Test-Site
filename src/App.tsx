@@ -229,7 +229,15 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
           <Smartphone size={18} className="text-blue-400" />
           <h3 className="font-bold text-sm text-white">HMI 터치 패널</h3>
         </div>
-        <div className="text-[10px] font-mono text-zinc-500">V2.4.1 로컬</div>
+        <div className="flex items-center gap-2">
+          <div className={cn(
+            "px-2 py-0.5 rounded text-[8px] font-bold uppercase",
+            state.controlAuthority === 'local' ? "bg-blue-500 text-white" : "bg-zinc-700 text-zinc-500"
+          )}>
+            현장 우선
+          </div>
+          <div className="text-[10px] font-mono text-zinc-500">V2.4.1 로컬</div>
+        </div>
       </div>
 
       {state.alarm && (
@@ -245,8 +253,9 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
           <input 
             type="number" 
             value={state.targetLength}
+            disabled={state.controlAuthority === 'remote'}
             onChange={(e) => setState(prev => ({ ...prev, targetLength: Number(e.target.value) }))}
-            className="w-full bg-transparent text-blue-400 font-bold text-xl outline-none"
+            className="w-full bg-transparent text-blue-400 font-bold text-xl outline-none disabled:opacity-30"
           />
         </div>
         <div className="bg-zinc-900 p-3 rounded-lg border border-zinc-700">
@@ -262,8 +271,9 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
       <div className="flex gap-4">
         <button 
           onClick={toggleAuto}
+          disabled={state.controlAuthority === 'remote'}
           className={cn(
-            "flex-1 py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2",
+            "flex-1 py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-30",
             state.isAuto ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "bg-zinc-700 text-zinc-400"
           )}
         >
@@ -272,7 +282,8 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
         </button>
         <button 
           onClick={() => setState(prev => ({ ...prev, count: 0 }))}
-          className="px-6 bg-zinc-700 text-zinc-300 rounded-xl hover:bg-zinc-600 transition-colors"
+          disabled={state.controlAuthority === 'remote'}
+          className="px-6 bg-zinc-700 text-zinc-300 rounded-xl hover:bg-zinc-600 transition-colors disabled:opacity-30"
         >
           <RotateCcw size={18} />
         </button>
@@ -333,6 +344,13 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
           </div>
         </div>
         <div className="flex items-center gap-4">
+          <div className={cn(
+            "px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1",
+            state.controlAuthority === 'remote' ? "bg-emerald-100 text-emerald-600" : "bg-zinc-100 text-zinc-400"
+          )}>
+            <div className={cn("w-1.5 h-1.5 rounded-full", state.controlAuthority === 'remote' ? "bg-emerald-500" : "bg-zinc-400")} />
+            원격 제어권 획득
+          </div>
           <div className="text-right">
             <p className="text-[10px] font-mono text-zinc-400">통신 상태</p>
             <p className="text-xs font-bold text-emerald-500 flex items-center gap-1 justify-end">
@@ -389,11 +407,12 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
           <div className="p-6 bg-zinc-900 rounded-2xl text-white space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <button 
+                disabled={state.controlAuthority === 'local'}
                 onClick={() => sendRemoteCommand(state.isRunning ? "정지" : "가동", () => 
                   setState(prev => ({ ...prev, isRunning: !prev.isRunning, isAuto: true }))
                 )}
                 className={cn(
-                  "py-4 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-2 border",
+                  "py-4 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-2 border disabled:opacity-30",
                   state.isRunning 
                     ? "bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-300" 
                     : "bg-emerald-600 border-emerald-500 hover:bg-emerald-500 text-white"
@@ -403,10 +422,11 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
                 {state.isRunning ? "원격 정지" : "원격 가동"}
               </button>
               <button 
+                disabled={state.controlAuthority === 'local'}
                 onClick={() => sendRemoteCommand("비상 정지", () => 
                   setState(prev => ({ ...prev, isRunning: false, isAuto: false }))
                 )}
-                className="py-4 bg-red-600/20 border border-red-500/50 hover:bg-red-600/30 text-red-500 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-2"
+                className="py-4 bg-red-600/20 border border-red-500/50 hover:bg-red-600/30 text-red-500 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-2 disabled:opacity-30"
               >
                 <AlertTriangle size={20} />
                 비상 정지 (원격)
@@ -422,11 +442,12 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
                 {[6.0, 8.0, 10.0, 12.0].map(len => (
                   <button 
                     key={len}
+                    disabled={state.controlAuthority === 'local'}
                     onClick={() => sendRemoteCommand(`길이 변경 ${len}m`, () => 
                       setState(prev => ({ ...prev, targetLength: len }))
                     )}
                     className={cn(
-                      "flex-1 py-2 rounded-lg text-[10px] font-bold border transition-all",
+                      "flex-1 py-2 rounded-lg text-[10px] font-bold border transition-all disabled:opacity-30",
                       state.targetLength === len 
                         ? "bg-emerald-500 border-emerald-400 text-white" 
                         : "bg-zinc-800 border-zinc-700 text-zinc-500 hover:text-zinc-300"
@@ -635,24 +656,37 @@ export default function App() {
 
         // Defect Simulation Logic
         if (prev.isDefectSimulating) {
-          if (prev.defectType === 'temp') {
-            nextTemp += 0.5; // Rapid heating
-            if (nextTemp > 60) {
-              nextAlarm = "커터 과열 감지 (60°C 초과)";
-              if (mode !== 'manual') nextIsRunning = false; // Auto-stop for HMI/SCADA/MES
-            }
-          } else if (prev.defectType === 'length') {
+          if (prev.defectType === 'length') {
             // Length error: skip cut or cut at wrong time
             if (nextLength >= prev.targetLength + 1.5) {
               nextAlarm = "치수 정밀도 불량 (허용 오차 초과)";
               if (mode !== 'manual') nextIsRunning = false;
+            }
+          } else if (prev.defectType === 'conflict') {
+            // Conflict simulation: SCADA changes length while running
+            if (nextLength > 2 && nextLength < 4 && !prev.isPriorityEnabled) {
+              // Simulate SCADA overriding HMI mid-process
+              return { ...prev, targetLength: 3.0, length: nextLength, alarm: "제어 충돌: SCADA가 목표치를 3m로 강제 변경함!" };
+            }
+            
+            // If priority is enabled, we just show a message that it was blocked
+            if (nextLength > 2 && nextLength < 4 && prev.isPriorityEnabled && !prev.alarm) {
+               nextAlarm = "정보: SCADA의 무단 설정 변경 시도가 차단되었습니다.";
+            }
+
+            if (prev.targetLength === 3.0 && nextLength >= 3.0) {
+              nextAlarm = "제어 충돌로 인한 오절단 발생 (목표 미달)";
+              nextIsRunning = false;
             }
           }
         }
 
         // Auto Cut Logic (HMI/SCADA/MES) - Only if no alarm or in manual
         const canCut = !nextAlarm || mode === 'manual';
-        if (canCut && prev.isAuto && nextLength >= prev.targetLength && !prev.isDefectSimulating) {
+        // Fix: Allow cutting during simulation if it's not a 'length' defect or if priority is enabled for conflict
+        const isDefectBlockingCut = prev.isDefectSimulating && (prev.defectType === 'length' || (prev.defectType === 'conflict' && !prev.isPriorityEnabled));
+        
+        if (canCut && prev.isAuto && nextLength >= prev.targetLength && !isDefectBlockingCut) {
           nextLength = 0;
           nextCount += 1;
           nextTemp += 0.5;
@@ -672,16 +706,25 @@ export default function App() {
     return () => clearInterval(interval);
   }, [mode]);
 
-  const triggerDefect = (type: 'length' | 'temp') => {
-    setState(prev => ({
-      ...prev,
-      isDefectSimulating: true,
-      defectType: type,
-      isRunning: true,
-      alarm: null
-    }));
-    
-    // Auto-resolve simulation after some time if needed, or keep it for demo
+  const triggerDefect = (type: 'length' | 'conflict') => {
+    setState(prev => {
+      // Toggle if same type is already active
+      if (prev.isDefectSimulating && prev.defectType === type) {
+        return {
+          ...prev,
+          isDefectSimulating: false,
+          defectType: null,
+          alarm: null
+        };
+      }
+      return {
+        ...prev,
+        isDefectSimulating: true,
+        defectType: type,
+        isRunning: true,
+        alarm: null
+      };
+    });
   };
 
   const resetSimulation = () => {
@@ -714,19 +757,6 @@ export default function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        {/* Intro */}
-        <section className="mb-12">
-          <div className="max-w-3xl">
-            <h2 className="text-4xl font-bold tracking-tight mb-4 leading-tight">
-              현장 제어에서 <span className="text-emerald-600">스마트 관제</span>까지
-            </h2>
-            <p className="text-zinc-500 leading-relaxed">
-              철근 절단기(Rebar Cutter) 설비를 예시로, 수동 조작반부터 HMI 자동화, SCADA 통합 관제, 그리고 MES 생산 관리까지 
-              어떻게 유기적으로 연결되고 데이터가 가치를 창출하는지 직접 시연해 보십시오.
-            </p>
-          </div>
-        </section>
-
         {/* Mode Selector Tabs & Simulation Controls */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div className="flex flex-wrap gap-2 p-1 bg-zinc-200/50 rounded-2xl w-fit">
@@ -760,15 +790,25 @@ export default function App() {
           <div className="flex gap-2">
             <button 
               onClick={() => triggerDefect('length')}
-              className="px-4 py-2 bg-red-50 text-red-600 border border-red-100 rounded-xl text-[10px] font-bold hover:bg-red-100 transition-colors flex items-center gap-2"
+              className={cn(
+                "px-4 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center gap-2 border",
+                state.defectType === 'length' 
+                  ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20" 
+                  : "bg-red-50 text-red-600 border-red-100 hover:bg-red-100"
+              )}
             >
               <Scissors size={14} /> 치수 불량 시연
             </button>
             <button 
-              onClick={() => triggerDefect('temp')}
-              className="px-4 py-2 bg-orange-50 text-orange-600 border border-orange-100 rounded-xl text-[10px] font-bold hover:bg-orange-100 transition-colors flex items-center gap-2"
+              onClick={() => triggerDefect('conflict')}
+              className={cn(
+                "px-4 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center gap-2 border",
+                state.defectType === 'conflict' 
+                  ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20" 
+                  : "bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-100"
+              )}
             >
-              <Activity size={14} /> 과열 불량 시연
+              <Cpu size={14} /> 제어 충돌 시연
             </button>
             <button 
               onClick={resetSimulation}
@@ -785,21 +825,49 @@ export default function App() {
           <div className="lg:col-span-7 space-y-8">
             <RebarVisualizer state={state} />
             
+            {/* Control Authority Simulation Settings (Moved to Left Column) */}
             <div className="p-8 bg-white rounded-2xl border border-zinc-200 shadow-sm">
-              <h3 className="text-xl font-bold mb-4">{MODE_DESCRIPTIONS[mode].title} 특징</h3>
-              <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
-                {MODE_DESCRIPTIONS[mode].desc}
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {MODE_DESCRIPTIONS[mode].features.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2 p-3 bg-zinc-50 rounded-xl border border-zinc-100">
-                    <div className={cn("w-1.5 h-1.5 rounded-full", 
-                      mode === 'manual' ? 'bg-amber-500' : mode === 'hmi' ? 'bg-blue-500' : mode === 'scada' ? 'bg-emerald-500' : 'bg-indigo-500'
-                    )} />
-                    <span className="text-xs font-medium text-zinc-700">{f}</span>
+              <p className="text-xs font-bold text-zinc-400 uppercase mb-6">우선권 로직 시뮬레이션 설정</p>
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="text-center">
+                  <p className="text-[10px] text-zinc-500 mb-2">현재 제어권</p>
+                  <div className="flex gap-2">
+                    {(['shared', 'local', 'remote'] as const).map(auth => (
+                      <button 
+                        key={auth}
+                        onClick={() => setState(prev => ({ ...prev, controlAuthority: auth }))}
+                        className={cn(
+                          "px-4 py-2 rounded-lg text-[10px] font-bold border transition-all",
+                          state.controlAuthority === auth 
+                            ? "bg-emerald-500 border-emerald-400 text-white" 
+                            : "bg-zinc-100 border-zinc-200 text-zinc-500"
+                        )}
+                      >
+                        {auth === 'shared' ? '공동' : auth === 'local' ? '현장' : '원격'}
+                      </button>
+                    ))}
                   </div>
-                ))}
+                </div>
+                <div className="hidden sm:block h-12 w-px bg-zinc-200" />
+                <div className="text-center">
+                  <p className="text-[10px] text-zinc-500 mb-2">충돌 방지 로직</p>
+                  <button 
+                    onClick={() => setState(prev => ({ ...prev, isPriorityEnabled: !prev.isPriorityEnabled }))}
+                    className={cn(
+                      "px-6 py-2 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-2",
+                      state.isPriorityEnabled 
+                        ? "bg-blue-500 border-blue-400 text-white" 
+                        : "bg-zinc-100 border-zinc-200 text-zinc-500"
+                    )}
+                  >
+                    {state.isPriorityEnabled ? <CheckCircle2 size={12} /> : <div className="w-3 h-3 border border-zinc-300 rounded-sm" />}
+                    {state.isPriorityEnabled ? '활성화됨' : '비활성화'}
+                  </button>
+                </div>
               </div>
+              <p className="mt-6 text-[10px] text-zinc-400 text-center leading-relaxed">
+                * '활성화' 시 제어 충돌 시연을 눌러도 SCADA의 무단 변경이 차단됩니다.
+              </p>
             </div>
 
             {/* Comparison Logic Note */}
@@ -837,6 +905,60 @@ export default function App() {
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Control Authority Solution Section */}
+        <section className="mt-20">
+          <div className="p-8 bg-zinc-900 rounded-3xl text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 blur-3xl -mr-32 -mt-32 rounded-full" />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center">
+                  <Cpu size={24} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold">제어권 경합 해결 방안 (Control Authority)</h3>
+                  <p className="text-zinc-400 text-sm">HMI와 SCADA 간의 명령 충돌을 방지하는 스마트 로직</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <div className="p-6 bg-zinc-800/50 rounded-2xl border border-zinc-700">
+                    <h4 className="font-bold mb-4 flex items-center gap-2 text-red-400">
+                      <AlertTriangle size={18} /> 문제 상황: 병행 제어의 위험성
+                    </h4>
+                    <p className="text-sm text-zinc-400 leading-relaxed">
+                      현장 작업자가 HMI에서 8m를 설정하고 가동 중인데, 중앙 SCADA에서 실수로 3m로 설정을 바꿔버리면 
+                      설비는 주행 중에 갑자기 3m 지점에서 절단을 시도하게 됩니다. 이는 <strong>제품 불량</strong>뿐만 아니라 
+                      고속 주행 중 급격한 동작 변화로 인한 <strong>설비 파손</strong>의 원인이 됩니다.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-emerald-500/10 rounded-2xl border border-emerald-500/20">
+                  <h4 className="font-bold mb-4 flex items-center gap-2 text-emerald-400">
+                    <CheckCircle2 size={18} /> 해결책: 우선권 및 제어권 이양 로직
+                  </h4>
+                  <ul className="space-y-3 text-sm text-zinc-300">
+                    <li className="flex gap-2">
+                      <span className="text-emerald-500 font-bold">1.</span>
+                      <span><strong>제어권 독점(Exclusive Control):</strong> 한 번에 하나의 인터페이스만 제어권을 갖도록 제한합니다.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-emerald-500 font-bold">2.</span>
+                      <span><strong>운전 중 설정 변경 금지:</strong> 설비가 가동 중일 때는 중요 파라미터 수정을 잠금 처리합니다.</span>
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="text-emerald-500 font-bold">3.</span>
+                      <span><strong>우선순위 설정:</strong> 비상 정지는 SCADA가 우선, 운전 조작은 현장 HMI가 우선하도록 설정합니다.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Defect Handling Section */}
         <section className="mt-20">
@@ -887,45 +1009,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* Scenario Guide */}
-        <section className="mt-20">
-          <div className="text-center mb-12">
-            <h3 className="text-2xl font-bold">시연 시나리오 가이드</h3>
-            <p className="text-sm text-zinc-500">누군가에게 설명할 때 아래 순서로 보여주세요.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              { 
-                step: '01', 
-                title: '수동 제어의 한계', 
-                desc: '현장 버튼을 직접 조작합니다. 데이터가 남지 않고 오차가 큽니다.' 
-              },
-              { 
-                step: '02', 
-                title: 'HMI 자동화', 
-                desc: '현장에서 정밀 제어가 가능해지지만, 데이터가 설비에 고립됩니다.' 
-              },
-              { 
-                step: '03', 
-                title: 'SCADA 통합 관제', 
-                desc: '원격으로 설비를 제어하고 모든 데이터를 실시간 수집합니다.' 
-              },
-              { 
-                step: '04', 
-                title: 'MES 지능화 관리', 
-                desc: '수집된 데이터를 분석하여 실적 관리와 품질 추적을 수행합니다.' 
-              },
-            ].map((s, i) => (
-              <div key={i} className="relative p-8 bg-white rounded-2xl border border-zinc-200 shadow-sm">
-                <span className="absolute -top-4 left-8 text-4xl font-black text-zinc-100 z-0">{s.step}</span>
-                <div className="relative z-10">
-                  <h4 className="font-bold mb-3">{s.title}</h4>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
       </main>
 
       <footer className="bg-zinc-900 text-white py-12 mt-20">

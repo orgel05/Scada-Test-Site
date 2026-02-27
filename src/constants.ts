@@ -10,7 +10,9 @@ export interface MachineState {
   targetLength: number;
   alarm: string | null;
   isDefectSimulating: boolean;
-  defectType: 'length' | 'temp' | null;
+  defectType: 'length' | 'temp' | 'conflict' | null;
+  controlAuthority: 'local' | 'remote' | 'shared';
+  isPriorityEnabled: boolean;
 }
 
 export const INITIAL_MACHINE_STATE: MachineState = {
@@ -23,7 +25,9 @@ export const INITIAL_MACHINE_STATE: MachineState = {
   targetLength: 8.0,
   alarm: null,
   isDefectSimulating: false,
-  defectType: null
+  defectType: null,
+  controlAuthority: 'shared',
+  isPriorityEnabled: false
 };
 
 export const MODE_DESCRIPTIONS = {
