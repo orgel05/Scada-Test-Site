@@ -131,7 +131,7 @@ const RebarVisualizer = ({ state }: { state: MachineState }) => {
           />
           
           {/* Position Label */}
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-zinc-800 rounded text-[8px] font-bold text-zinc-500 whitespace-nowrap border border-zinc-700">
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 px-3 py-1 bg-zinc-800 rounded text-xs font-bold text-zinc-400 whitespace-nowrap border border-zinc-700">
             절단점: {state.targetLength.toFixed(1)}m
           </div>
         </motion.div>
@@ -139,12 +139,12 @@ const RebarVisualizer = ({ state }: { state: MachineState }) => {
 
       {/* Labels */}
       <div className="absolute top-4 left-6 flex gap-4">
-        <div className="px-3 py-1 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400 flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+        <div className="px-4 py-2 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg text-xs font-mono text-zinc-400 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-blue-500" />
           길이: <span className="text-white font-bold">{state.length.toFixed(2)}m</span>
         </div>
-        <div className="px-3 py-1 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400 flex items-center gap-2">
-          <div className={cn("w-1.5 h-1.5 rounded-full", (state.temp > 40 || state.defectType === 'temp') ? "bg-red-500 animate-pulse" : "bg-emerald-500")} />
+        <div className="px-4 py-2 bg-zinc-900/80 backdrop-blur-sm border border-zinc-800 rounded-lg text-xs font-mono text-zinc-400 flex items-center gap-2">
+          <div className={cn("w-2 h-2 rounded-full", (state.temp > 40 || state.defectType === 'temp') ? "bg-red-500 animate-pulse" : "bg-emerald-500")} />
           온도: <span className="text-white font-bold">{state.temp.toFixed(1)}°C</span>
         </div>
       </div>
@@ -161,8 +161,8 @@ const RebarVisualizer = ({ state }: { state: MachineState }) => {
             <div className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 animate-bounce">
               <AlertTriangle size={24} />
               <div className="text-left">
-                <p className="text-[10px] font-bold opacity-80 uppercase">시스템 알람</p>
-                <p className="text-sm font-black">{state.alarm}</p>
+                <p className="text-xs font-bold opacity-80 uppercase">시스템 알람</p>
+                <p className="text-base font-black">{state.alarm}</p>
               </div>
             </div>
           </motion.div>
@@ -179,36 +179,36 @@ const ManualPanel = ({ state, setState }: { state: MachineState, setState: React
 
   return (
     <div className="p-6 bg-zinc-100 rounded-2xl border border-zinc-200 space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Settings2 size={18} className="text-amber-600" />
-        <h3 className="font-bold text-sm">현장 조작반 (버튼 제어)</h3>
+      <div className="flex items-center gap-3 mb-4">
+        <Settings2 size={20} className="text-amber-600" />
+        <h3 className="font-bold text-base">현장 조작반 (버튼 제어)</h3>
       </div>
       
       <div className="grid grid-cols-2 gap-4">
         <button 
           onClick={() => setState(prev => ({ ...prev, isRunning: !prev.isRunning }))}
           className={cn(
-            "h-20 rounded-xl flex flex-col items-center justify-center gap-2 shadow-lg transition-all",
+            "h-24 rounded-xl flex flex-col items-center justify-center gap-2 shadow-lg transition-all",
             state.isRunning 
               ? "bg-red-600 shadow-red-900/20 text-white" 
               : "bg-emerald-600 shadow-emerald-900/20 text-white"
           )}
         >
-          {state.isRunning ? <Square size={24} /> : <Play size={24} />}
-          <span className="text-[10px] font-bold">{state.isRunning ? "모터 정지" : "모터 가동"}</span>
+          {state.isRunning ? <Square size={28} /> : <Play size={28} />}
+          <span className="text-xs font-bold">{state.isRunning ? "모터 정지" : "모터 가동"}</span>
         </button>
         <button 
           onClick={handleCut}
-          className="h-20 bg-zinc-800 active:bg-zinc-900 text-white rounded-xl flex flex-col items-center justify-center gap-2 shadow-lg shadow-zinc-900/20 transition-all"
+          className="h-24 bg-zinc-800 active:bg-zinc-900 text-white rounded-xl flex flex-col items-center justify-center gap-2 shadow-lg shadow-zinc-900/20 transition-all"
         >
-          <Scissors size={24} />
-          <span className="text-[10px] font-bold">수동 절단</span>
+          <Scissors size={28} />
+          <span className="text-xs font-bold">수동 절단</span>
         </button>
       </div>
 
-      <div className="p-4 bg-white rounded-xl border border-zinc-200 space-y-2">
-        <p className="text-[10px] font-bold text-zinc-400 uppercase">수동 조작 로그</p>
-        <div className="text-xs font-mono text-zinc-600 h-20 overflow-y-auto">
+      <div className="p-4 bg-white rounded-xl border border-zinc-200 space-y-3">
+        <p className="text-xs font-bold text-zinc-400 uppercase">수동 조작 로그</p>
+        <div className="text-sm font-mono text-zinc-600 h-24 overflow-y-auto">
           {state.count > 0 && Array.from({ length: state.count }).map((_, i) => (
             <div key={i}>[로그] #{i + 1}번 철근 수동 절단 완료</div>
           ))}
@@ -225,18 +225,18 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
   return (
     <div className="p-6 bg-zinc-800 rounded-2xl border-4 border-zinc-700 shadow-2xl space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
-          <Smartphone size={18} className="text-blue-400" />
-          <h3 className="font-bold text-sm text-white">HMI 터치 패널</h3>
+        <div className="flex items-center gap-3">
+          <Smartphone size={20} className="text-blue-400" />
+          <h3 className="font-bold text-base text-white">HMI 터치 패널</h3>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div className={cn(
-            "px-2 py-0.5 rounded text-[8px] font-bold uppercase",
+            "px-3 py-1 rounded text-xs font-bold uppercase whitespace-nowrap",
             state.controlAuthority === 'local' ? "bg-blue-500 text-white" : "bg-zinc-700 text-zinc-500"
           )}>
             현장 우선
           </div>
-          <div className="text-[10px] font-mono text-zinc-500">V2.4.1 로컬</div>
+          <div className="text-xs font-mono text-zinc-500 whitespace-nowrap">V2.4.1 로컬</div>
         </div>
       </div>
 
@@ -248,23 +248,23 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
       )}
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-zinc-900 p-3 rounded-lg border border-zinc-700">
-          <p className="text-[10px] text-zinc-500 mb-1">목표 길이 (m)</p>
+        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700">
+          <p className="text-xs text-zinc-500 mb-2">목표 길이 (m)</p>
           <input 
             type="number" 
             value={state.targetLength}
             disabled={state.controlAuthority === 'remote'}
             onChange={(e) => setState(prev => ({ ...prev, targetLength: Number(e.target.value) }))}
-            className="w-full bg-transparent text-blue-400 font-bold text-xl outline-none disabled:opacity-30"
+            className="w-full bg-transparent text-blue-400 font-bold text-2xl outline-none disabled:opacity-30"
           />
         </div>
-        <div className="bg-zinc-900 p-3 rounded-lg border border-zinc-700">
-          <p className="text-[10px] text-zinc-500 mb-1">현재 길이 (m)</p>
-          <p className="text-white font-bold text-xl">{state.length.toFixed(2)}</p>
+        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700">
+          <p className="text-xs text-zinc-500 mb-2">현재 길이 (m)</p>
+          <p className="text-white font-bold text-2xl">{state.length.toFixed(2)}</p>
         </div>
-        <div className="bg-zinc-900 p-3 rounded-lg border border-zinc-700">
-          <p className="text-[10px] text-zinc-500 mb-1">절단 수량</p>
-          <p className="text-white font-bold text-xl">{state.count}</p>
+        <div className="bg-zinc-900 p-4 rounded-lg border border-zinc-700">
+          <p className="text-xs text-zinc-500 mb-2">절단 수량</p>
+          <p className="text-white font-bold text-2xl">{state.count}</p>
         </div>
       </div>
 
@@ -273,11 +273,11 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
           onClick={toggleAuto}
           disabled={state.controlAuthority === 'remote'}
           className={cn(
-            "flex-1 py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-30",
+            "flex-1 py-5 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-3 disabled:opacity-30",
             state.isAuto ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "bg-zinc-700 text-zinc-400"
           )}
         >
-          {state.isAuto ? <Square size={18} /> : <Play size={18} />}
+          {state.isAuto ? <Square size={20} /> : <Play size={20} />}
           {state.isAuto ? "자동 운전 정지" : "자동 운전 시작"}
         </button>
         <button 
@@ -289,9 +289,9 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
         </button>
       </div>
 
-      <div className="h-12 bg-zinc-900 rounded-lg flex items-center px-4 gap-3 border border-zinc-700">
-        <div className={cn("w-2 h-2 rounded-full animate-pulse", state.isRunning ? "bg-emerald-500" : "bg-zinc-600")} />
-        <span className="text-xs font-mono text-zinc-400">
+      <div className="h-14 bg-zinc-900 rounded-lg flex items-center px-4 gap-4 border border-zinc-700">
+        <div className={cn("w-3 h-3 rounded-full animate-pulse", state.isRunning ? "bg-emerald-500" : "bg-zinc-600")} />
+        <span className="text-sm font-mono text-zinc-400">
           {state.isAuto ? "PLC 로직: 자동 사이클 가동 중" : "PLC 로직: 대기 중"}
         </span>
       </div>
@@ -345,16 +345,16 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
         </div>
         <div className="flex items-center gap-4">
           <div className={cn(
-            "px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1",
+            "px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 whitespace-nowrap",
             state.controlAuthority === 'remote' ? "bg-emerald-100 text-emerald-600" : "bg-zinc-100 text-zinc-400"
           )}>
-            <div className={cn("w-1.5 h-1.5 rounded-full", state.controlAuthority === 'remote' ? "bg-emerald-500" : "bg-zinc-400")} />
+            <div className={cn("w-2 h-2 rounded-full", state.controlAuthority === 'remote' ? "bg-emerald-500" : "bg-zinc-400")} />
             원격 제어권 획득
           </div>
-          <div className="text-right">
-            <p className="text-[10px] font-mono text-zinc-400">통신 상태</p>
-            <p className="text-xs font-bold text-emerald-500 flex items-center gap-1 justify-end">
-              <Server size={12} /> OPC UA 연결됨
+          <div className="text-right shrink-0">
+            <p className="text-xs font-mono text-zinc-400 whitespace-nowrap">통신 상태</p>
+            <p className="text-sm font-bold text-emerald-500 flex items-center gap-2 justify-end whitespace-nowrap">
+              <Server size={14} /> OPC UA 연결됨
             </p>
           </div>
         </div>
@@ -362,18 +362,18 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
 
       {state.alarm && (
         <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600">
-              <AlertTriangle size={18} />
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+              <AlertTriangle size={20} />
             </div>
             <div>
-              <p className="text-xs font-bold text-red-600">설비 이상 알람 발생</p>
-              <p className="text-[10px] text-red-500">{state.alarm}</p>
+              <p className="text-sm font-bold text-red-600">설비 이상 알람 발생</p>
+              <p className="text-xs text-red-500">{state.alarm}</p>
             </div>
           </div>
           <button 
             onClick={() => setState(prev => ({ ...prev, alarm: null, isDefectSimulating: false, temp: 25 }))}
-            className="px-3 py-1 bg-red-600 text-white rounded-lg text-[10px] font-bold"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg text-xs font-bold"
           >
             알람 해제 (Reset)
           </button>
@@ -545,12 +545,12 @@ const MESPanel = ({ state }: { state: MachineState }) => {
       <div className="p-6 bg-zinc-50 rounded-2xl border border-zinc-100 space-y-4">
         <div className="flex justify-between items-end">
           <div>
-            <p className="text-[10px] font-bold text-zinc-400 uppercase mb-1">생산 목표 달성률</p>
-            <h4 className="text-2xl font-black text-zinc-900">{progress.toFixed(1)}%</h4>
+            <p className="text-xs font-bold text-zinc-400 uppercase mb-2">생산 목표 달성률</p>
+            <h4 className="text-3xl font-black text-zinc-900">{progress.toFixed(1)}%</h4>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-mono text-zinc-400">목표: {productionGoal} EA</p>
-            <p className="text-sm font-bold text-indigo-600">현재: {state.count} EA</p>
+            <p className="text-xs font-mono text-zinc-400">목표: {productionGoal} EA</p>
+            <p className="text-base font-bold text-indigo-600">현재: {state.count} EA</p>
           </div>
         </div>
         <div className="h-3 bg-zinc-200 rounded-full overflow-hidden">
@@ -740,19 +740,19 @@ export default function App() {
       {/* Header */}
       <header className="bg-white border-b border-zinc-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
-              <LayoutDashboard size={18} />
-            </div>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight">철근 절단 공정 제어 시뮬레이션</h1>
-              <p className="text-[10px] text-zinc-500 font-mono uppercase">철근 절단 공정 디지털 트윈</p>
-            </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white">
+            <LayoutDashboard size={18} />
           </div>
-          <div className="flex items-center gap-2">
-            <div className={cn("w-2 h-2 rounded-full", state.isRunning ? "bg-emerald-500" : "bg-zinc-300")} />
-            <span className="text-[10px] font-bold text-zinc-400 uppercase">{state.isRunning ? '가동 중' : '정지됨'}</span>
+          <div className="whitespace-nowrap">
+            <h1 className="text-sm font-bold tracking-tight">철근 절단 공정 제어 시뮬레이션</h1>
+            <p className="text-[10px] text-zinc-500 font-mono uppercase">철근 절단 공정 디지털 트윈</p>
           </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className={cn("w-2 h-2 rounded-full", state.isRunning ? "bg-emerald-500" : "bg-zinc-300")} />
+          <span className="text-[10px] font-bold text-zinc-400 uppercase whitespace-nowrap">{state.isRunning ? '가동 중' : '정지됨'}</span>
+        </div>
         </div>
       </header>
 
@@ -772,49 +772,49 @@ export default function App() {
                   }
                 }}
                 className={cn(
-                  "px-6 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+                  "px-6 py-4 rounded-xl text-sm font-bold transition-all flex items-center gap-3 whitespace-nowrap",
                   mode === m 
                     ? "bg-white text-zinc-900 shadow-sm ring-1 ring-zinc-300" 
                     : "text-zinc-500 hover:text-zinc-900"
                 )}
               >
-                {m === 'manual' && <Settings2 size={16} />}
-                {m === 'hmi' && <Smartphone size={16} />}
-                {m === 'scada' && <Monitor size={16} />}
-                {m === 'mes' && <BarChart3 size={16} />}
+                {m === 'manual' && <Settings2 size={18} />}
+                {m === 'hmi' && <Smartphone size={18} />}
+                {m === 'scada' && <Monitor size={18} />}
+                {m === 'mes' && <BarChart3 size={18} />}
                 {MODE_DESCRIPTIONS[m].title}
               </button>
             ))}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button 
               onClick={() => triggerDefect('length')}
               className={cn(
-                "px-4 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center gap-2 border",
+                "px-5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap",
                 state.defectType === 'length' 
                   ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20" 
                   : "bg-red-50 text-red-600 border-red-100 hover:bg-red-100"
               )}
             >
-              <Scissors size={14} /> 치수 불량 시연
+              <Scissors size={16} /> 치수 불량 시연
             </button>
             <button 
               onClick={() => triggerDefect('conflict')}
               className={cn(
-                "px-4 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center gap-2 border",
+                "px-5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap",
                 state.defectType === 'conflict' 
                   ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20" 
                   : "bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-100"
               )}
             >
-              <Cpu size={14} /> 제어 충돌 시연
+              <Cpu size={16} /> 제어 충돌 시연
             </button>
             <button 
               onClick={resetSimulation}
-              className="px-4 py-2 bg-zinc-100 text-zinc-600 border border-zinc-200 rounded-xl text-[10px] font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2"
+              className="px-5 py-3 bg-zinc-100 text-zinc-600 border border-zinc-200 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2 whitespace-nowrap"
             >
-              <RotateCcw size={14} /> 초기화
+              <RotateCcw size={16} /> 초기화
             </button>
           </div>
         </div>
@@ -827,17 +827,17 @@ export default function App() {
             
             {/* Control Authority Simulation Settings (Moved to Left Column) */}
             <div className="p-8 bg-white rounded-2xl border border-zinc-200 shadow-sm">
-              <p className="text-xs font-bold text-zinc-400 uppercase mb-6">우선권 로직 시뮬레이션 설정</p>
-              <div className="flex flex-col sm:flex-row items-center gap-6">
+              <p className="text-sm font-bold text-zinc-400 uppercase mb-6">우선권 로직 시뮬레이션 설정</p>
+              <div className="flex flex-col sm:flex-row items-center gap-8">
                 <div className="text-center">
-                  <p className="text-[10px] text-zinc-500 mb-2">현재 제어권</p>
+                  <p className="text-xs text-zinc-500 mb-3">현재 제어권</p>
                   <div className="flex gap-2">
                     {(['shared', 'local', 'remote'] as const).map(auth => (
                       <button 
                         key={auth}
                         onClick={() => setState(prev => ({ ...prev, controlAuthority: auth }))}
                         className={cn(
-                          "px-4 py-2 rounded-lg text-[10px] font-bold border transition-all",
+                          "px-4 py-3 rounded-lg text-xs font-bold border transition-all whitespace-nowrap",
                           state.controlAuthority === auth 
                             ? "bg-emerald-500 border-emerald-400 text-white" 
                             : "bg-zinc-100 border-zinc-200 text-zinc-500"
@@ -848,24 +848,24 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                <div className="hidden sm:block h-12 w-px bg-zinc-200" />
+                <div className="hidden sm:block h-16 w-px bg-zinc-200" />
                 <div className="text-center">
-                  <p className="text-[10px] text-zinc-500 mb-2">충돌 방지 로직</p>
+                  <p className="text-xs text-zinc-500 mb-3 whitespace-nowrap">충돌 방지 로직</p>
                   <button 
                     onClick={() => setState(prev => ({ ...prev, isPriorityEnabled: !prev.isPriorityEnabled }))}
                     className={cn(
-                      "px-6 py-2 rounded-lg text-[10px] font-bold border transition-all flex items-center gap-2",
+                      "px-6 py-3 rounded-lg text-xs font-bold border transition-all flex items-center gap-3 whitespace-nowrap",
                       state.isPriorityEnabled 
                         ? "bg-blue-500 border-blue-400 text-white" 
                         : "bg-zinc-100 border-zinc-200 text-zinc-500"
                     )}
                   >
-                    {state.isPriorityEnabled ? <CheckCircle2 size={12} /> : <div className="w-3 h-3 border border-zinc-300 rounded-sm" />}
+                    {state.isPriorityEnabled ? <CheckCircle2 size={16} /> : <div className="w-4 h-4 border border-zinc-300 rounded-sm" />}
                     {state.isPriorityEnabled ? '활성화됨' : '비활성화'}
                   </button>
                 </div>
               </div>
-              <p className="mt-6 text-[10px] text-zinc-400 text-center leading-relaxed">
+              <p className="mt-6 text-xs text-zinc-400 text-center leading-relaxed">
                 * '활성화' 시 제어 충돌 시연을 눌러도 SCADA의 무단 변경이 차단됩니다.
               </p>
             </div>
@@ -975,21 +975,21 @@ export default function App() {
           <div className="grid grid-cols-1 gap-6">
             {DEFECT_SCENARIOS.map((scenario, idx) => (
               <div key={idx} className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
-                <div className="bg-zinc-50 px-6 py-4 border-b border-zinc-200">
-                  <h4 className="font-bold text-zinc-900 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full" />
+                <div className="bg-zinc-50 px-6 py-5 border-b border-zinc-200">
+                  <h4 className="text-lg font-bold text-zinc-900 flex items-center gap-3">
+                    <div className="w-3 h-3 bg-red-500 rounded-full" />
                     {scenario.title}
                   </h4>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-zinc-100">
                   {(['manual', 'hmi', 'scada', 'mes'] as const).map((m) => (
                     <div key={m} className={cn(
-                      "p-6 space-y-3 transition-colors",
+                      "p-8 space-y-4 transition-colors",
                       mode === m ? "bg-zinc-50/50" : ""
                     )}>
                       <div className="flex items-center gap-2">
                         <span className={cn(
-                          "text-[10px] font-bold px-2 py-0.5 rounded uppercase",
+                          "text-xs font-bold px-3 py-1 rounded uppercase",
                           m === 'manual' ? "bg-amber-100 text-amber-700" :
                           m === 'hmi' ? "bg-blue-100 text-blue-700" :
                           m === 'scada' ? "bg-emerald-100 text-emerald-700" :
@@ -998,7 +998,7 @@ export default function App() {
                           {MODE_DESCRIPTIONS[m].title}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-600 leading-relaxed">
+                      <p className="text-sm text-zinc-600 leading-relaxed">
                         {scenario[m]}
                       </p>
                     </div>
