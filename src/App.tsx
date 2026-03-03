@@ -184,26 +184,45 @@ const ManualPanel = ({ state, setState }: { state: MachineState, setState: React
         <h3 className="font-bold text-base">현장 조작반 (버튼 제어)</h3>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
-        <button 
-          onClick={() => setState(prev => ({ ...prev, isRunning: !prev.isRunning }))}
-          className={cn(
-            "h-24 rounded-xl flex flex-col items-center justify-center gap-2 shadow-lg transition-all",
-            state.isRunning 
-              ? "bg-red-600 shadow-red-900/20 text-white" 
-              : "bg-emerald-600 shadow-emerald-900/20 text-white"
-          )}
-        >
-          {state.isRunning ? <Square size={28} /> : <Play size={28} />}
-          <span className="text-xs font-bold">{state.isRunning ? "모터 정지" : "모터 가동"}</span>
-        </button>
-        <button 
-          onClick={handleCut}
-          className="h-24 bg-zinc-800 active:bg-zinc-900 text-white rounded-xl flex flex-col items-center justify-center gap-2 shadow-lg shadow-zinc-900/20 transition-all"
-        >
-          <Scissors size={28} />
-          <span className="text-xs font-bold">수동 절단</span>
-        </button>
+      <div className="grid grid-cols-2 gap-8">
+        {/* Motor Start/Stop Button */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-32 h-32 bg-zinc-300 rounded-2xl border-4 border-zinc-400 shadow-inner flex items-center justify-center p-4 relative">
+            <button 
+              onClick={() => setState(prev => ({ ...prev, isRunning: !prev.isRunning }))}
+              className={cn(
+                "w-full h-full rounded-full transition-all duration-75 active:scale-95 active:translate-y-1 shadow-[0_10px_0_0_rgba(0,0,0,0.3)] active:shadow-none border-4",
+                state.isRunning 
+                  ? "bg-red-600 border-red-700 hover:bg-red-500" 
+                  : "bg-emerald-600 border-emerald-700 hover:bg-emerald-500"
+              )}
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+              <div className="flex items-center justify-center text-white">
+                {state.isRunning ? <Square size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" />}
+              </div>
+            </button>
+          </div>
+          <span className="text-xs font-black text-zinc-600 uppercase tracking-tight">
+            {state.isRunning ? "모터 정지" : "모터 가동"}
+          </span>
+        </div>
+
+        {/* Manual Cut Button */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-32 h-32 bg-zinc-300 rounded-2xl border-4 border-zinc-400 shadow-inner flex items-center justify-center p-4 relative">
+            <button 
+              onClick={handleCut}
+              className="w-full h-full bg-red-700 border-4 border-red-900 rounded-full transition-all duration-75 active:scale-95 active:translate-y-1 shadow-[0_10px_0_0_rgba(0,0,0,0.3)] active:shadow-none hover:bg-red-600"
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+              <div className="flex items-center justify-center text-white">
+                <Scissors size={32} />
+              </div>
+            </button>
+          </div>
+          <span className="text-xs font-black text-zinc-600 uppercase tracking-tight">수동 절단</span>
+        </div>
       </div>
 
       <div className="p-4 bg-white rounded-xl border border-zinc-200 space-y-3">
@@ -289,9 +308,9 @@ const HMIPanel = ({ state, setState }: { state: MachineState, setState: React.Di
         </button>
       </div>
 
-      <div className="h-14 bg-zinc-900 rounded-lg flex items-center px-4 gap-4 border border-zinc-700">
-        <div className={cn("w-3 h-3 rounded-full animate-pulse", state.isRunning ? "bg-emerald-500" : "bg-zinc-600")} />
-        <span className="text-sm font-mono text-zinc-400">
+      <div className="h-14 bg-zinc-900 rounded-lg flex items-center px-4 gap-4 border border-zinc-700 overflow-hidden">
+        <div className={cn("w-3 h-3 rounded-full animate-pulse shrink-0", state.isRunning ? "bg-emerald-500" : "bg-zinc-600")} />
+        <span className="text-sm font-mono text-zinc-400 whitespace-nowrap overflow-hidden text-ellipsis">
           {state.isAuto ? "PLC 로직: 자동 사이클 가동 중" : "PLC 로직: 대기 중"}
         </span>
       </div>
@@ -333,28 +352,25 @@ const SCADAPanel = ({ state, setState }: { state: MachineState, setState: React.
         )}
       </AnimatePresence>
 
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
-            <Monitor size={20} />
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-9 h-9 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
+            <Monitor size={18} />
           </div>
-          <div>
-            <h3 className="font-bold text-lg">중앙 SCADA 대시보드</h3>
-            <p className="text-xs text-zinc-500">1번 라인 철근 절단 스테이션 (원격 제어 활성화)</p>
-          </div>
+          <h3 className="font-bold text-base whitespace-nowrap overflow-hidden text-ellipsis">중앙 SCADA 대시보드</h3>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 shrink-0">
           <div className={cn(
-            "px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 whitespace-nowrap",
+            "px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1.5 whitespace-nowrap",
             state.controlAuthority === 'remote' ? "bg-emerald-100 text-emerald-600" : "bg-zinc-100 text-zinc-400"
           )}>
-            <div className={cn("w-2 h-2 rounded-full", state.controlAuthority === 'remote' ? "bg-emerald-500" : "bg-zinc-400")} />
-            원격 제어권 획득
+            <div className={cn("w-1.5 h-1.5 rounded-full", state.controlAuthority === 'remote' ? "bg-emerald-500" : "bg-zinc-400")} />
+            원격 제어권
           </div>
           <div className="text-right shrink-0">
-            <p className="text-xs font-mono text-zinc-400 whitespace-nowrap">통신 상태</p>
-            <p className="text-sm font-bold text-emerald-500 flex items-center gap-2 justify-end whitespace-nowrap">
-              <Server size={14} /> OPC UA 연결됨
+            <p className="text-[10px] font-mono text-zinc-400 whitespace-nowrap leading-none mb-1">통신 상태</p>
+            <p className="text-xs font-bold text-emerald-500 flex items-center gap-1.5 justify-end whitespace-nowrap leading-none">
+              <Server size={12} /> OPC UA
             </p>
           </div>
         </div>
@@ -786,37 +802,6 @@ export default function App() {
               </button>
             ))}
           </div>
-
-          <div className="flex gap-3">
-            <button 
-              onClick={() => triggerDefect('length')}
-              className={cn(
-                "px-5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap",
-                state.defectType === 'length' 
-                  ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20" 
-                  : "bg-red-50 text-red-600 border-red-100 hover:bg-red-100"
-              )}
-            >
-              <Scissors size={16} /> 치수 불량 시연
-            </button>
-            <button 
-              onClick={() => triggerDefect('conflict')}
-              className={cn(
-                "px-5 py-3 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border whitespace-nowrap",
-                state.defectType === 'conflict' 
-                  ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20" 
-                  : "bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-100"
-              )}
-            >
-              <Cpu size={16} /> 제어 충돌 시연
-            </button>
-            <button 
-              onClick={resetSimulation}
-              className="px-5 py-3 bg-zinc-100 text-zinc-600 border border-zinc-200 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center gap-2 whitespace-nowrap"
-            >
-              <RotateCcw size={16} /> 초기화
-            </button>
-          </div>
         </div>
 
         {/* Simulation Area */}
@@ -824,6 +809,38 @@ export default function App() {
           {/* Left: Visualizer & Info */}
           <div className="lg:col-span-7 space-y-8">
             <RebarVisualizer state={state} />
+
+            {/* Simulation Controls (Moved here) */}
+            <div className="flex flex-wrap gap-3">
+              <button 
+                onClick={() => triggerDefect('length')}
+                className={cn(
+                  "flex-1 px-5 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border whitespace-nowrap",
+                  state.defectType === 'length' 
+                    ? "bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20" 
+                    : "bg-red-50 text-red-600 border-red-100 hover:bg-red-100"
+                )}
+              >
+                <Scissors size={16} /> 치수 불량 시연
+              </button>
+              <button 
+                onClick={() => triggerDefect('conflict')}
+                className={cn(
+                  "flex-1 px-5 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 border whitespace-nowrap",
+                  state.defectType === 'conflict' 
+                    ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-900/20" 
+                    : "bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-100"
+                )}
+              >
+                <Cpu size={16} /> 제어 충돌 시연
+              </button>
+              <button 
+                onClick={resetSimulation}
+                className="flex-1 px-5 py-3 bg-zinc-100 text-zinc-600 border border-zinc-200 rounded-xl text-xs font-bold hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+              >
+                <RotateCcw size={16} /> 초기화
+              </button>
+            </div>
             
             {/* Control Authority Simulation Settings (Moved to Left Column) */}
             <div className="p-8 bg-white rounded-2xl border border-zinc-200 shadow-sm">
